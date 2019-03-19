@@ -23,6 +23,14 @@ func (ms *moviestoreImpl) AddUser(name string, age Age) UserID {
 }
 
 func (ms *moviestoreImpl) Rent(serial Serial, userID UserID) (User, Movie, error) {
+	movie, isAvailable := ms.available[serial]
+	_, userExists := ms.users[userID]
+	if isAvailable && userExists{
+		delete(ms.available,serial)
+		ms.rented[userID] = append(ms.rented[userID],movie)
+	}else{
+		//error
+	}
 	return User{}, Movie{}, nil
 }
 
