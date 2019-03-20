@@ -11,4 +11,3 @@ type Moviestore interface {
 func NewMoviestore() Moviestore {
 	return nil
 }
-

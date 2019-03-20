@@ -36,9 +36,8 @@ func (ms *moviestoreImpl) Rent(serial Serial, userID UserID) (User, Movie, error
 		} else {
 			return User{}, Movie{}, errors.New("the Movie with the Serial: " + string(serial) + " was not found")
 		}
-	} else {
-		return User{}, Movie{}, errors.New("no User with the ID: " + string(userID) + " was found")
 	}
+	return User{}, Movie{}, errors.New("no User with the ID: " + string(userID) + " was found")
 }
 
 func (ms *moviestoreImpl) RentedByUser(userID UserID) ([]Movie, error) {
