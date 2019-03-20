@@ -13,14 +13,14 @@ type moviestoreImpl struct {
 func (ms *moviestoreImpl) AddMovie(title string, fsk FSK) Serial {
 	nextSerial := ms.nextSerial
 	ms.nextSerial++
-	ms.available[nextSerial] = Movie{title,fsk,nextSerial}
+	ms.available[nextSerial] = Movie{title, fsk, nextSerial}
 	return nextSerial
 }
 
 func (ms *moviestoreImpl) AddUser(name string, age Age) UserID {
 	nextUserID := ms.nextUserID
 	ms.nextUserID++
-	ms.users[nextUserID] = User{name,age,nextUserID}
+	ms.users[nextUserID] = User{name, age, nextUserID}
 	ms.rented[nextUserID] = []Movie{}
 	return nextUserID
 }
@@ -28,49 +28,49 @@ func (ms *moviestoreImpl) AddUser(name string, age Age) UserID {
 func (ms *moviestoreImpl) Rent(serial Serial, userID UserID) (User, Movie, error) {
 	movie, isAvailable := ms.available[serial]
 	user, userExists := ms.users[userID]
-	if isAvailable && userExists{
-		delete(ms.available,serial)
-		ms.rented[userID] = append(ms.rented[userID],movie)
-		return user, movie,nil
-	}else if isAvailable && !userExists{
-		return User{},Movie{},errors.New("no User with the ID: " + string(userID) + " was found")
-	}else if !isAvailable && userExists{
-		return User{},Movie{},errors.New("the Movie with the Serial: " + string(serial) + " was not found. It might have been rented")
-	}else{
-		return User{},Movie{},errors.New("neither the user nor the movie was found")
+	if userExists {
+		if isAvailable {
+			delete(ms.available, serial)
+			ms.rented[userID] = append(ms.rented[userID], movie)
+			return user, movie, nil
+		} else {
+			return User{}, Movie{}, errors.New("the Movie with the Serial: " + string(serial) + " was not found")
+		}
+	} else {
+		return User{}, Movie{}, errors.New("no User with the ID: " + string(userID) + " was found")
 	}
 }
 
 func (ms *moviestoreImpl) RentedByUser(userID UserID) ([]Movie, error) {
-	rentedMovies,userExists := ms.rented[userID]
-	if userExists{
-		return rentedMovies,nil
-	}else{
-		return []Movie{},errors.New("the User with the UserID: " + string(userID) + " does not exist")
+	rentedMovies, userExists := ms.rented[userID]
+	if userExists {
+		return rentedMovies, nil
 	}
+	return []Movie{}, errors.New("the User with the UserID: " + string(userID) + " does not exist")
+
 }
 
 func (ms *moviestoreImpl) Return(serial Serial) (User, Movie, error) {
-	_,movieAvailable := ms.available[serial]
-	if movieAvailable{
+	_, movieAvailable := ms.available[serial]
+	if movieAvailable {
 		return User{}, Movie{}, errors.New("the Movie can't be returned since it's already available")
 	}
 	var returnMovie Movie
 	var renterUserID UserID
-	for user,rentedMovies := range ms.rented{
+	for user, rentedMovies := range ms.rented {
 		newRentedMovies := rentedMovies[:0]
-		for _,movie := range rentedMovies{
-			if movie.Serial != serial{
+		for _, movie := range rentedMovies {
+			if movie.Serial != serial {
 				newRentedMovies = append(newRentedMovies, movie)
-			}else{
+			} else {
 				returnMovie = movie
 				renterUserID = user
 			}
 		}
 		ms.rented[user] = newRentedMovies
 	}
-	if returnMovie.Serial != serial{
+	if returnMovie.Serial != serial {
 		return User{}, Movie{}, errors.New("the Movie can't be returned since it it not rented")
 	}
-	return ms.users[renterUserID],returnMovie,nil
+	return ms.users[renterUserID], returnMovie, nil
 }
