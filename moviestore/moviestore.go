@@ -45,7 +45,6 @@ func (ms *moviestoreImpl) RentedByUser(userID UserID) ([]Movie, error) {
 		return rentedMovies, nil
 	}
 	return []Movie{}, errors.New("the User with the UserID: " + string(userID) + " does not exist")
-
 }
 
 func (ms *moviestoreImpl) Return(serial Serial) (User, Movie, error) {
