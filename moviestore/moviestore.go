@@ -30,9 +30,11 @@ func (ms *moviestoreImpl) Rent(serial Serial, userID UserID) (User, Movie, error
 	user, userExists := ms.users[userID]
 	if userExists {
 		if isAvailable {
-			delete(ms.available, serial)
-			ms.rented[userID] = append(ms.rented[userID], movie)
-			return user, movie, nil
+			if AllowedAtAge(&movie, user.Age) {
+				delete(ms.available, serial)
+				ms.rented[userID] = append(ms.rented[userID], movie)
+				return user, movie, nil
+			}
 		}
 		return User{}, Movie{}, errors.New("the Movie with the Serial: " + string(serial) + " was not found")
 	}
